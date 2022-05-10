@@ -1,7 +1,7 @@
 import React, { ChangeEvent, KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { setPlayer } from '../../redux/slice/Game';
+import { setPlayer } from '../../redux/slice/player';
 import { RootState } from '../../redux/store';
 
 // Mock a default player object
@@ -15,7 +15,7 @@ const Intro = () => {
     const navigate = useNavigate();
 
     // Get my current data from store
-    const me = useSelector((state: RootState) => state.game.player);
+    const me = useSelector((state: RootState) => state.player);
     
     // Enter a username
     const handleName = (e: ChangeEvent<HTMLInputElement>) => {

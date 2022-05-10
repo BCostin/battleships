@@ -1,17 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-export interface IGame {
-    player: IPlayer,
-    activePlayers: IPlayer[] | undefined[],
-    whoNext: string
-}
-
 const initialState: IGame = {
-    player: {
-        uuid: '',
-        username: '',
-    },
-    activePlayers: [],
+    gameID: '',
+    status: 'pending',
+    players: [],
+    ships: {},
+    guesses: [],
+    hits: [],
+    misses: [],
     whoNext: '',
 }
 
@@ -19,19 +15,20 @@ export const gameSlice = createSlice({
     name: 'game',
     initialState,
     reducers: {
-        setWhoNext: (state, action: PayloadAction<string>) => {
-            state.whoNext = action.payload;
+        setStatus: (state, action: PayloadAction<IGame['status']>) => {
+            state.status = action.payload;
+            return state;
         },
-        setPlayer: (state, action: PayloadAction<IPlayer>) => {
-            state.player = action.payload;
+        setThisPlayer: (state, action: PayloadAction<IPlayer>) => {
+            state.players.push(JSON.stringify(action.payload));
             return state;
         },
     },
 })
 
-export const { 
-    setWhoNext,
-    setPlayer,
+export const {
+    setStatus,
+    setThisPlayer,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;
