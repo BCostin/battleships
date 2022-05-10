@@ -1,0 +1,6 @@
+/node_modules
+/build
+/dist
+
+# We'll just leave this one out for now :)
+#.env
