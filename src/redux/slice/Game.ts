@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const initialState: IGame = {
     gameID: '',
@@ -15,20 +15,30 @@ export const gameSlice = createSlice({
     name: 'game',
     initialState,
     reducers: {
-        setStatus: (state, action: PayloadAction<IGame['status']>) => {
+        setGameID: (state, action: PayloadAction<string>) => {
+            state.gameID = action.payload;
+            return state;
+        },
+        setStatus: (state, action: PayloadAction<IGame["status"]>) => {
             state.status = action.payload;
             return state;
         },
         setThisPlayer: (state, action: PayloadAction<IPlayer>) => {
-            state.players.push(JSON.stringify(action.payload));
+            state.players.push(action.payload);
+            return state;
+        },
+        resetGameInstance: (state) => {
+            state = initialState;
             return state;
         },
     },
 })
 
 export const {
+    setGameID,
     setStatus,
     setThisPlayer,
+    resetGameInstance,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

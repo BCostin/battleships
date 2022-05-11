@@ -11,8 +11,9 @@ interface IShipType {
 }
 
 interface IShipLayout {
-    ship: IShipType | string,
-    positions: TPosition[]
+    ship: string,
+    positions: TPosition[] | undefined,
+    size?: number,
 }
 
 interface IGuess {
@@ -23,7 +24,7 @@ interface IGuess {
 interface IGame {
     gameID: string,
     status: "pending" | "ongoing" | "finished",
-    players: string[], // array of uuids
+    players: IPlayer[], // array of uuids
     ships: Record<string, unknown>,
     guesses: IGuess[],
     hits: [], // Store all correct guesses / direct hits

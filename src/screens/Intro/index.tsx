@@ -6,7 +6,7 @@ import { RootState } from '../../redux/store';
 
 // Mock a default player object
 const myData: IPlayer = {
-    uuid: 'a',
+    uuid: 'uuid-a',
     username: '',
 };
 
@@ -31,9 +31,10 @@ const Intro = () => {
 
     return(
         <div>
-            Please pick a username
+            Please pick a username <br/>
             <input 
-                type={"text"} 
+                type={"text"}
+                autoFocus
                 onChange={handleName}
                 onKeyDown={handleKeyDown} 
                 value={me.username} 
