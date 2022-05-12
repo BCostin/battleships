@@ -15,13 +15,13 @@ const shipTypes: Record<string, IShipType> = {
     destroyer: { size: 2, count: 1 },
 };
 
-const shipLayout = [
-    { "ship": "carrier", "positions": [[2,9], [3,9], [4,9], [5,9], [6,9]] },
-    { "ship": "battleship", "positions": [[5,2], [5,3], [5,4], [5,5]] },
-    { "ship": "cruiser", "positions": [[8,1], [8,2], [8,3]] },
-    { "ship": "submarine", "positions": [[3,0], [3,1], [3,2]] },
-    { "ship": "destroyer", "positions": [[0,0], [1,0]] }
-]
+// const shipLayout = [
+//     { "ship": "carrier", "positions": [[2,9], [3,9], [4,9], [5,9], [6,9]] },
+//     { "ship": "battleship", "positions": [[5,2], [5,3], [5,4], [5,5]] },
+//     { "ship": "cruiser", "positions": [[8,1], [8,2], [8,3]] },
+//     { "ship": "submarine", "positions": [[3,0], [3,1], [3,2]] },
+//     { "ship": "destroyer", "positions": [[0,0], [1,0]] }
+// ]
 
 // The total units of a single board (on a side)
 const boardUnits = 10;
@@ -123,16 +123,16 @@ const Boards = () => {
         const playerIDs = gameInstance.players.map((el) => el.uuid);
 
         // Recursive method to generate other ship type but at most 2 of the same type
-        const generateShipType = (playerShips: IShipLayout[]) => {
+        const generateShipType = (playerShips: IShipLayout[]): any => {
             const newShipType = shiptTypesArr[getRandomNr(5)];
             if (playerShips.filter((el) => el.ship === newShipType).length >= 2) {
-                generateShipType(playerShips);
+                return generateShipType(playerShips);
             } else {
                 return newShipType;
             }
         }
 
-        const generatePositions = (shipLen: number, allShips: IShipLayout[]) => {            
+        const generatePositions = (shipLen: number, allShips: IShipLayout[]): any => {            
             // This gives a 'non-index' value, pure integer.
             const maxUnit = boardUnits - shipLen;
 
@@ -154,8 +154,7 @@ const Boards = () => {
             });
 
             if (existsSameStart.length) {
-                console.log('START EXISTS: ', existsSameStart);
-                generatePositions(shipLen, allShips);
+                return generatePositions(shipLen, allShips);
 
             } else {
                 // Generate the rest of the coords but remove the start point from the LENGTH
@@ -165,14 +164,12 @@ const Boards = () => {
 
                     newPos.push([x, y]);
                 }
-
-                // console.log('--------------', shipLen);
+                
                 return newPos;
             }
         };
 
         let newShips: IGame["ships"] = {}; // Object containing ships for each Player UUID
-        let tempShips: IShipLayout[] =  []; // We need this to check positions, no duplicate starting points
 
         playerIDs.forEach((el) => {
             let playerShips: IShipLayout[] = [];
@@ -191,13 +188,6 @@ const Boards = () => {
                 };
     
                 playerShips.push(newShip);
-                tempShips.push(newShip);
-
-                // newShip['direction'] = getDirection();
-                // let shipType = shiptTypesArr[getRandomNr(5)];
-
-                // console.log(el + ' ' + i + ' - ' + direction);
-                // newShips[el] = randomShip;
             }
             
             // Add ships to each player uuid
@@ -208,7 +198,6 @@ const Boards = () => {
         });
         
         console.log('---------------------------', newShips);
-
     };
     
 
