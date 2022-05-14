@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 export const useMockPlayer = () => {
     const data: IPlayer = {
         uuid: 'uuid-b',
-        username: 'Player 2'
+        username: 'Destroyer Ai'
     };
     
     return data;

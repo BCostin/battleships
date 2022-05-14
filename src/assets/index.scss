@@ -1,3 +1,111 @@
+html,
 body {
-    background: #f1f1f1;
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+$black8: rgba(0, 0, 0, 0.08);
+$black15: rgba(0, 0, 0, 0.15);
+$black20: rgba(0, 0, 0, 0.2);
+$squareSize: 40px;
+
+.ship-statuses {
+    padding: 10px 0;
+
+    .row {
+        padding: 2px 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .ship-image {
+        max-width: 70px;
+        margin: 0 10px 0 0;
+    }
+
+    .hit {
+        width: $squareSize;
+        height: $squareSize;
+        
+        &.s {
+            width: 12px;
+            height: 12px;
+        }
+    }
+}
+
+.main-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    
+    .board-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+    }
+
+    .board-display {
+
+    }
+
+    .board-wrapper {
+        border: 1px solid $black15;
+    }
+
+    .board {
+        max-width: $squareSize * 10;
+        display: flex;
+        flex-wrap: wrap;
+
+        .row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item {
+            width: $squareSize;
+            height: $squareSize;
+            font-size: 12px;
+            border-right: 1px solid $black15;
+            border-top: 1px solid $black15;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+
+            &.ship-fragment {
+                box-shadow: inset 0 0 10px $black20;
+            }
+
+            &.hit {
+                background: url('../../static/HitSmall.png') no-repeat;
+                background-size: 80% 80%;
+                background-position: center;
+            }
+
+            &.miss {
+                background: url('../../static/MissSmall.png') no-repeat;
+                background-size: 80% 80%;
+                background-position: center;
+            }
+
+            &:nth-child(-n + 10) {
+                border-top: none;
+            }
+
+            &:nth-child(10n) {
+                border-right: none;
+            }
+        }
+    }
 }

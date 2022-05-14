@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import {Board, MAX_BOARD_UNITS } from '../../components/Board';
+import ShipHits from '../../components/ShipHits';
+import { addDelay, getRandomNr } from '../../helpers/methods';
 import { useMockPlayer } from '../../hooks/useMockPlayer';
-import { resetGameInstance, setGameID, setStatus, setThisPlayer } from '../../redux/slice/game';
+import { resetGameInstance, setGameID, setShips, setStatus, setThisPlayer, setWhoNext } from '../../redux/slice/game';
 import { RootState } from '../../redux/store';
 
 const shiptTypesArr = ["carrier", "battleship", "cruiser", "submarine", "destroyer"];
@@ -23,16 +26,6 @@ const shipTypes: Record<string, IShipType> = {
 //     { "ship": "destroyer", "positions": [[0,0], [1,0]] }
 // ]
 
-// The total units of a single board (on a side)
-const boardUnits = 10;
-
-// We mostly need this to set a direction, left of right for ship generation
-const getRandomNr = (max: number) => Math.floor(Math.random() * max);
-
-// Generate a random number from 0 to 9 only
-// We will use this method to work with positions on the Board
-const getRandomNumber = () => Math.floor(Math.random() * 10);
-
 // Need this for ships' directions
 const getDirection = () => getRandomNr(2) == 0 ? 'horizontal' : 'vertical';
 
@@ -40,12 +33,15 @@ const Boards = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const [key, setKey] = useState(0);
+
     // Players data
     const me = useSelector((state: RootState) => state.player);
     const playerTwo = useMockPlayer();
     
     const gameInstance = useSelector((state: RootState) => state.game);
     const gameStatus = gameInstance.status;
+    const gameReady = gameInstance.status == "ongoing";
 
     // When the screen mounts, we must create ALL the data needed to play the game
     useEffect(() => {
@@ -64,10 +60,19 @@ const Boards = () => {
     useEffect(() => {
         console.log('A player has joined the room');
 
+
         // When we have exactly 2 players, update game status and game id
         if (gameInstance.players.length === 2 && gameStatus === "pending") {
             dispatch(setGameID('game-1'));
-            setGameStatus("ongoing");
+
+            if (gameInstance.whoNext == '' && !gameInstance.hits.length) {
+                // Randomly set who makes the first move. 0 / 1
+                const rand = Math.round(Math.random());
+                dispatch(setWhoNext(gameInstance.players[rand].uuid));
+            }
+
+            // Simulate waiting for the other user
+            addDelay(() => setGameStatus("ongoing"), 500);
         }
 
     }, [gameInstance.players]);
@@ -105,8 +110,9 @@ const Boards = () => {
     // Wrapper for setting up the game instance
     const runGameInstance = () => {
         connectPlayers();
-        displayBoard();
     }
+
+    const setGameStatus = (gameStatus: IGame["status"]) => dispatch(setStatus(gameStatus));
 
     // 'Connect' both players to the same instance / room
     const connectPlayers = () => {
@@ -122,49 +128,49 @@ const Boards = () => {
     const generateShips = () => {
         const playerIDs = gameInstance.players.map((el) => el.uuid);
 
-        // Recursive method to generate other ship type but at most 2 of the same type
-        const generateShipType = (playerShips: IShipLayout[]): any => {
-            const newShipType = shiptTypesArr[getRandomNr(5)];
-            if (playerShips.filter((el) => el.ship === newShipType).length >= 2) {
-                return generateShipType(playerShips);
-            } else {
-                return newShipType;
-            }
-        }
-
-        const generatePositions = (shipLen: number, allShips: IShipLayout[]): any => {            
-            // This gives a 'non-index' value, pure integer.
-            const maxUnit = boardUnits - shipLen;
-
+        const generatePositions = (shipLen: number, allShips: IShipLayout[]): any => {
             let newPos: TPosition[] = [];
-            let startCoords: TPosition = [getRandomNr(maxUnit), getRandomNr(maxUnit)]; // set a default value non-zero
+            let startCoords: TPosition = [getRandomNr(MAX_BOARD_UNITS), getRandomNr(MAX_BOARD_UNITS)]; // set a default value non-zero
 
             const isHoriz = getDirection() === 'horizontal';
+            
+            const toRight = isHoriz && startCoords[0] + (shipLen - 1) >= MAX_BOARD_UNITS - 1 ? false : true;
+            const toBottom = !isHoriz && startCoords[1] + (shipLen - 1) >= MAX_BOARD_UNITS - 1 ? false : true;
             
             // Add the starting point of the ship
             newPos = [startCoords];
 
             const updatedShipLen = shipLen - 1;
 
-            // Check if there's another ship with the same Starting Coordinates
-            const existsSameStart = allShips.filter((el) => {
+            // Generate the rest of the coords.
+            // Allow generation from left to right / right to left / top to bottom / bottom to top
+            for (let i = 0; i < updatedShipLen; i ++) {
+                const xVal = newPos[newPos.length - 1][0];
+                const yVal = newPos[newPos.length - 1][1];
+
+                const x = isHoriz ?  xVal + (toRight ? 1 : -1) : xVal;
+                const y = !isHoriz ? yVal + (toBottom ? 1 : -1) : yVal;
+                
+                newPos.push([x, y]);
+            }
+            
+            // Check if there's another ship with an intersection point
+            const pointsIntersect = allShips.filter((el) => {
                 if (el.positions) {
-                    return JSON.stringify(el.positions).includes(JSON.stringify(startCoords)); 
+                    let exists: any = [];
+                    newPos.forEach(newEl => {
+                        if (JSON.stringify(el.positions).includes(JSON.stringify(newEl))) {
+                            exists.push(newEl);
+                        }
+                    });
+                    return exists.length > 0; 
                 }
             });
 
-            if (existsSameStart.length) {
+            if (pointsIntersect.length) {
                 return generatePositions(shipLen, allShips);
 
             } else {
-                // Generate the rest of the coords but remove the start point from the LENGTH
-                for (let i = 0; i < updatedShipLen; i ++) {
-                    const x = isHoriz ? newPos[newPos.length - 1][0] + 1 : newPos[newPos.length - 1][0];
-                    const y = isHoriz ? newPos[newPos.length - 1][1] : newPos[newPos.length - 1][1] + 1;
-
-                    newPos.push([x, y]);
-                }
-                
                 return newPos;
             }
         };
@@ -173,40 +179,83 @@ const Boards = () => {
 
         playerIDs.forEach((el) => {
             let playerShips: IShipLayout[] = [];
-            for (let i = 0; i < 5; i ++) {
-                // generate a random ship type
-                const shipType: any = generateShipType(playerShips);
-
+            shiptTypesArr.forEach((el) => {
                 // Start generating the positions
-                const { size } = shipTypes[shipType];
+                const { size } = shipTypes[el];
                 let positions = generatePositions(size, playerShips);
                 
                 const newShip: IShipLayout = {
-                    ship: shipType,
+                    ship: el,
                     size: size,
                     positions: positions,
                 };
     
                 playerShips.push(newShip);
-            }
+            });
             
             // Add ships to each player uuid
             newShips[el] = playerShips;
             
-            // Reset this array and generate for the next player
+            // Release var
             playerShips = [];
         });
         
-        console.log('---------------------------', newShips);
+        dispatch(setShips(newShips));
     };
     
-
-    const displayBoard = () => {};
-
-    const setGameStatus = (gameStatus: IGame["status"]) => dispatch(setStatus(gameStatus));
+    useEffect(() => {
+        setKey(key + 1);
+    }, [gameInstance.ships])
 
     return(
-        <div>Battle fields</div>
+        <React.Fragment>
+            <div className="main-wrapper">
+                {!gameReady ? (
+                    <>Game initializing ...</>
+                ) : (
+                    <>
+                        {gameInstance.players.map((el, i) => {
+                            return(
+                                <div key={i} className="board-container">
+                                    <Board 
+                                        player={el}
+                                        ships={gameInstance.ships[el.uuid]}
+                                    />
+                                    
+                                    <div className="ship-statuses">
+                                        <div className="row">
+                                            <img className="ship-image" src="/aircraftShape.png" alt="" />
+                                            
+                                            <div className="hits">
+                                                <ShipHits count={5} />
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="row">
+                                            <img className="ship-image" src="/battleshipShape.png" alt="" />
+                                        </div>
+                                        
+                                        <div className="row">
+                                            <img className="ship-image" src="/cruiserShape.png" alt="" />
+                                        </div>
+                                            
+                                        <div className="row">
+                                            <img className="ship-image" src="/submarineShape.png" alt="" />
+                                        </div>
+                                            
+                                        <div className="row">
+                                            <img className="ship-image" src="/carrierShape.png" alt="" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            );
+                        })}
+                    </>
+                )}
+
+            </div>
+        </React.Fragment>
     );
 };
 
