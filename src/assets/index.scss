@@ -17,16 +17,19 @@ $squareSize: 40px;
 
 .ship-statuses {
     padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 
     .row {
         padding: 2px 0;
         display: flex;
+        flex-direction: column;
         align-items: center;
     }
 
     .ship-image {
         max-width: 70px;
-        margin: 0 10px 0 0;
     }
 
     .hit {
@@ -70,6 +73,10 @@ $squareSize: 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+
+            &:first-child > .item {
+                border-top: none;
+            }
         }
 
         .item {
@@ -83,9 +90,11 @@ $squareSize: 40px;
             align-items: center;
             cursor: pointer;
 
-            &.ship-fragment {
-                box-shadow: inset 0 0 10px $black20;
-            }
+            &.red { background-color: red !important; };
+            &.blue { background-color: blue !important; };
+            &.green { background-color: green !important; };
+            &.yellow { background-color: yellow !important; };
+            &.black { background-color: black !important; };
 
             &.hit {
                 background: url('../../static/HitSmall.png') no-repeat;
@@ -97,10 +106,6 @@ $squareSize: 40px;
                 background: url('../../static/MissSmall.png') no-repeat;
                 background-size: 80% 80%;
                 background-position: center;
-            }
-
-            &:nth-child(-n + 10) {
-                border-top: none;
             }
 
             &:nth-child(10n) {

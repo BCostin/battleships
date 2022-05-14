@@ -8,3 +8,8 @@ export const addDelay = async (fn: () => void, ms: number) => {
         resolve(true);
     }, ms));
 };
+
+// Need this for ships' directions
+export const getDirection = () => getRandomNr(2) == 0 ? 'horizontal' : 'vertical';
+
+export const compareArr = (arr1: any, arr2: any) => JSON.stringify(arr1).includes(JSON.stringify(arr2));

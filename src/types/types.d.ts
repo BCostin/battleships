@@ -8,11 +8,14 @@ type TPosition = [x: number, y: number];
 interface IShipType {
     size: number,
     count: number,
+    color?: string,
 }
 
 interface IShipLayout {
     ship: string,
     positions: TPosition[] | undefined,
+    color: string,
+    hits: number,
     size?: number,
 }
 
@@ -32,18 +35,18 @@ interface IGame {
     hits: [], // Store all correct guesses / direct hits
     misses: [], // Store all incorrect guesses / direct miss
     whoNext: string, // an existing uuid
+    winner: IPlayer | null,
 }
 
 interface IBoard {
     player: IPlayer,
-    ships: unknown,
+    ships?: unknown,
 }
 
 interface IBoardItem {
     playerUUID: string,
     playerShips: IShipLayout[],
     value: TPosition,
-    guessData?: IGuess,
     actionDisabled?: boolean,
     shipFragment?: boolean,
     index?: number,

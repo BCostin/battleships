@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { shipTypes } from '../../screens/Boards';
 
 const initialState: IGame = {
     gameID: '',
@@ -9,6 +10,7 @@ const initialState: IGame = {
     hits: [],
     misses: [],
     whoNext: '',
+    winner: null,
 }
 
 export const gameSlice = createSlice({
@@ -29,16 +31,34 @@ export const gameSlice = createSlice({
         },
         setShips: (state, action: PayloadAction<IGame["ships"]>) => {
             state.ships = action.payload;
-            console.log('setShips: ', action.payload);
             return state;
         },
         addGuess: (state, action: PayloadAction<IGuess>) => {
+            const data = action.payload;
+
             const exists = state.guesses.filter(el => {
-                return el.uuid == action.payload.uuid && JSON.stringify(el.position) == JSON.stringify(action.payload.position)
+                return el.uuid == data.uuid && JSON.stringify(el.position) == JSON.stringify(data.position)
             });
             
-            if (!exists.length) { 
-                state.guesses.push(action.payload);
+            // Only add non-duplicate guesses
+            if (!exists.length) {
+                if (state.guesses.length) {
+                    if (state.guesses[state.guesses.length - 1].uuid != data.uuid) {
+                        state.guesses.push(data);
+                    }
+                } else {
+                    state.guesses.push(data);
+                }
+
+                if (data.hit) {
+                    const myTotalGuesses = state.guesses.filter(el => el.uuid == data.uuid && el.hit).length;
+                    let totalValidHits = 0;
+                    Object.keys(shipTypes).forEach(el => totalValidHits += shipTypes[el].size);
+
+                    if (myTotalGuesses == totalValidHits) {
+                        state.winner = state.players.filter(el => el.uuid == data.uuid)[0];
+                    }
+                }
 
                 // Also change 'whoNext'
                 state.whoNext = state.players.filter(el => el.uuid !== action.payload.uuid)[0].uuid;

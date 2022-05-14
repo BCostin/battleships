@@ -3,19 +3,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {Board, MAX_BOARD_UNITS } from '../../components/Board';
 import ShipHits from '../../components/ShipHits';
-import { addDelay, getRandomNr } from '../../helpers/methods';
+import { addDelay, getDirection, getRandomNr } from '../../helpers/methods';
 import { useMockPlayer } from '../../hooks/useMockPlayer';
 import { resetGameInstance, setGameID, setShips, setStatus, setThisPlayer, setWhoNext } from '../../redux/slice/game';
 import { RootState } from '../../redux/store';
 
 const shiptTypesArr = ["carrier", "battleship", "cruiser", "submarine", "destroyer"];
 
-const shipTypes: Record<string, IShipType> = {
-    carrier: { size: 5, count: 1 },
-    battleship: { size: 4, count: 1 },
-    cruiser: { size: 3, count: 1 },
-    submarine: { size: 3, count: 1 },
-    destroyer: { size: 2, count: 1 },
+export const shipTypes: Record<string, IShipType> = {
+    carrier: { size: 5, count: 1, color: 'red' },
+    battleship: { size: 4, count: 1, color: 'blue' },
+    cruiser: { size: 3, count: 1, color: 'green' },
+    submarine: { size: 3, count: 1, color: 'yellow' },
+    destroyer: { size: 2, count: 1, color: 'black' },
 };
 
 // const shipLayout = [
@@ -26,14 +26,9 @@ const shipTypes: Record<string, IShipType> = {
 //     { "ship": "destroyer", "positions": [[0,0], [1,0]] }
 // ]
 
-// Need this for ships' directions
-const getDirection = () => getRandomNr(2) == 0 ? 'horizontal' : 'vertical';
-
 const Boards = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
-    const [key, setKey] = useState(0);
 
     // Players data
     const me = useSelector((state: RootState) => state.player);
@@ -42,6 +37,8 @@ const Boards = () => {
     const gameInstance = useSelector((state: RootState) => state.game);
     const gameStatus = gameInstance.status;
     const gameReady = gameInstance.status == "ongoing";
+
+    const winner = gameInstance.winner;
 
     // When the screen mounts, we must create ALL the data needed to play the game
     useEffect(() => {
@@ -56,10 +53,13 @@ const Boards = () => {
 
     }, []);
 
+    useEffect(() => {
+        console.log('Winner: ', winner);
+    }, [winner]);
+
     // Monitor the connected players
     useEffect(() => {
         console.log('A player has joined the room');
-
 
         // When we have exactly 2 players, update game status and game id
         if (gameInstance.players.length === 2 && gameStatus === "pending") {
@@ -119,12 +119,12 @@ const Boards = () => {
         // Add myself
         dispatch(setThisPlayer(me));
 
-        // At the same time, we will 'artificially' connect the other player here.
+        // At the same time, we will connect the other player here, for simplicity
         dispatch(setThisPlayer(playerTwo));
     };
 
     // Generate random ships for current player
-    // We will also use this to 'artificially' generate for the second player
+    // We will also use this to generate for the second player
     const generateShips = () => {
         const playerIDs = gameInstance.players.map((el) => el.uuid);
 
@@ -181,12 +181,14 @@ const Boards = () => {
             let playerShips: IShipLayout[] = [];
             shiptTypesArr.forEach((el) => {
                 // Start generating the positions
-                const { size } = shipTypes[el];
+                const { size, color } = shipTypes[el];
                 let positions = generatePositions(size, playerShips);
                 
                 const newShip: IShipLayout = {
                     ship: el,
                     size: size,
+                    color: color !== undefined ? color : '',
+                    hits: 0,
                     positions: positions,
                 };
     
@@ -203,10 +205,6 @@ const Boards = () => {
         dispatch(setShips(newShips));
     };
     
-    useEffect(() => {
-        setKey(key + 1);
-    }, [gameInstance.ships])
-
     return(
         <React.Fragment>
             <div className="main-wrapper">
@@ -219,7 +217,7 @@ const Boards = () => {
                                 <div key={i} className="board-container">
                                     <Board 
                                         player={el}
-                                        ships={gameInstance.ships[el.uuid]}
+                                        // ships={gameInstance.ships[el.uuid]}
                                     />
                                     
                                     <div className="ship-statuses">
