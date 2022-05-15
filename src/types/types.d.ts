@@ -9,6 +9,7 @@ interface IShipType {
     size: number,
     count: number,
     color?: string,
+    image?: string,
 }
 
 interface IShipLayout {
@@ -24,6 +25,7 @@ interface IGuess {
     uuidTarget: string,
     position: TPosition,
     hit: number,
+    shipType?: string
 }
 
 interface IGame {
@@ -43,6 +45,10 @@ interface IBoard {
     ships?: unknown,
 }
 
+interface IMyHitHandler {
+    uuid: string, position: TPosition, shipType?: string
+}
+
 interface IBoardItem {
     playerUUID: string,
     playerShips: IShipLayout[],
@@ -50,12 +56,5 @@ interface IBoardItem {
     actionDisabled?: boolean,
     shipFragment?: boolean,
     index?: number,
-    checkHandler?: (uuid: string, position: TPosition) => void,
-}
-
-interface IAddGuess {
-    uuid: string,
-    uuidTarget: string,
-    position: TPosition,
-    hit: number,
+    checkHandler?: (props: IMyHitHandler) => void,
 }

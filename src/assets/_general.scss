@@ -1,0 +1,205 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+input {
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+}
+
+$black8: rgba(0, 0, 0, 0.08);
+$black15: rgba(0, 0, 0, 0.15);
+$black20: rgba(0, 0, 0, 0.2);
+$squareSize: 40px;
+
+.me + .main-wrapper .board-container:nth-child(1) .board-wrapper,
+.enemy + .main-wrapper .board-container:nth-child(2) .board-wrapper {
+    border-color: #10ac84 !important;
+}
+
+.main-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    
+    @include isTabletAndMobile {
+        height: auto;
+        flex-direction: column;
+    }
+
+    .board-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+    }
+
+    .board-display {
+        
+        @include isMobile {
+            max-width: 306px;
+        }
+
+        .player-name {
+            text-transform: capitalize;
+            display: flex;
+
+            .emoji {
+                margin-right: 10px;
+            }
+        }
+    }
+
+    .board-wrapper {
+        transition: all 0.3s ease;
+        border: 14px solid $black15;
+        border-radius: 10px;
+    }
+
+    .board {
+        max-width: $squareSize * 10;
+        display: flex;
+        flex-wrap: wrap;
+
+        @include isMobile {
+            max-width: 280px;
+        }
+
+        .row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            &:first-child > .item {
+                border-top: none;
+            }
+        }
+
+        .item {
+            width: $squareSize;
+            height: $squareSize;
+            font-size: 12px;
+            border-right: 1px solid $black15;
+            border-top: 1px solid $black15;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+
+            @include isMobile {
+                width: 28px;
+                height: 28px;
+            }
+    
+            &.red { background-color: #f368e0 !important; };
+            &.blue { background-color: #0abde3 !important; };
+            &.green { background-color: #1dd1a1 !important; };
+            &.yellow { background-color: #feca57 !important; };
+            &.black { background-color: #222f3e !important; };
+
+            &.hit {
+                background: url('../../static/HitSmall.png') no-repeat;
+                background-size: 80% 80%;
+                background-position: center;
+            }
+
+            &.miss {
+                background: url('../../static/MissSmall.png') no-repeat;
+                background-size: 80% 80%;
+                background-position: center;
+            }
+
+            &.disabled { cursor: not-allowed; }
+
+            &:nth-child(10n) {
+                border-right: none;
+            }
+        }
+    }
+}
+
+.ship-statuses {
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .row {
+        padding: 2px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ship-image {
+        max-width: 70px;
+        
+        @include isTabletAndMobile {
+            max-width: 65px;
+        }
+
+        @include isMobile {
+            max-width: 60px;
+        }
+
+    }
+
+    .hits {
+        height: 15px;
+        display: flex;
+        padding: 6px 0 0 0;
+    }
+
+    .hit {
+        width: $squareSize;
+        height: $squareSize;
+        
+        &.s {
+            width: 12px;
+            height: 12px;
+        }
+
+        &.bg-image {
+            background: url("../../static/HitSmall.png") no-repeat;
+            background-size: cover;
+        }
+    }
+}
+
+.restart-btn {
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 14px;
+    text-transform: uppercase;
+    background: #54a0ff;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+
+    &:hover {
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+    }
+}

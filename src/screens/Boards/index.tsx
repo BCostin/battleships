@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {Board, MAX_BOARD_UNITS } from '../../components/Board';
+import GameLoader from '../../components/GameLoader';
+import ModalFinish from '../../components/ModalFinish';
+import PlayAgainButton from '../../components/PlayAgainButton';
 import ShipHits from '../../components/ShipHits';
 import { addDelay, getDirection, getRandomNr } from '../../helpers/methods';
 import { useMockPlayer } from '../../hooks/useMockPlayer';
@@ -11,13 +14,14 @@ import { RootState } from '../../redux/store';
 const shiptTypesArr = ["carrier", "battleship", "cruiser", "submarine", "destroyer"];
 
 export const shipTypes: Record<string, IShipType> = {
-    carrier: { size: 5, count: 1, color: 'red' },
-    battleship: { size: 4, count: 1, color: 'blue' },
-    cruiser: { size: 3, count: 1, color: 'green' },
-    submarine: { size: 3, count: 1, color: 'yellow' },
-    destroyer: { size: 2, count: 1, color: 'black' },
+    carrier: { size: 5, count: 1, color: 'red', image: 'aircraftShape.png' },
+    battleship: { size: 4, count: 1, color: 'blue', image: 'battleshipShape.png' },
+    cruiser: { size: 3, count: 1, color: 'green', image: 'cruiserShape.png' },
+    submarine: { size: 3, count: 1, color: 'yellow', image: 'submarineShape.png' },
+    destroyer: { size: 2, count: 1, color: 'black', image: 'carrierShape.png' },
 };
 
+// // Variable Reference from assignment ... leave this comment
 // const shipLayout = [
 //     { "ship": "carrier", "positions": [[2,9], [3,9], [4,9], [5,9], [6,9]] },
 //     { "ship": "battleship", "positions": [[5,2], [5,3], [5,4], [5,5]] },
@@ -42,7 +46,7 @@ const Boards = () => {
         // On refresh just redirect back to intro based on my username
         // Otherwise, start the game
         if (!me.username) {
-            dispatch(resetGameInstance()); 
+            dispatch(resetGameInstance());
             navigate('/');
         } else {
             runGameInstance();
@@ -50,18 +54,9 @@ const Boards = () => {
 
     }, []);
 
-    useEffect(() => {
-        if (winner) {
-            console.log('************************');
-            console.log('Winner: ', winner);
-            console.log('************************');
-        }
-
-    }, [winner]);
-
     // Monitor the connected players
     useEffect(() => {
-        console.log('A player has joined the room');
+        console.warn('A player has joined the room');
 
         // When we have exactly 2 players, update game status and game id
         if (players.length === 2 && status === "pending") {
@@ -74,11 +69,10 @@ const Boards = () => {
             }
 
             // Simulate waiting for the other user
-            addDelay(() => setGameStatus("ongoing"), 500);
+            addDelay(() => setGameStatus("ongoing"), 2500);
         }
 
     }, [players]);
-
 
     // Monitor the Game Status. We need this to generate all the data when the game 'starts'
     useEffect(() => {
@@ -209,44 +203,21 @@ const Boards = () => {
     
     return(
         <>
+            {winner ? <ModalFinish winner={winner} me={me} /> : null}
+
             <div className={`${whoNext == me.uuid ? 'me' : 'enemy'}`} />
         
             <div className="main-wrapper">
                 {!gameReady ? (
-                    <>Game initializing ...</>
+                    <GameLoader />
+
                 ) : (
                     <>
                         {players.map((el, i) => {
                             return(
                                 <div key={i} className="board-container">
                                     <Board player={el} />
-                                    
-                                    <div className="ship-statuses">
-                                        <div className="row">
-                                            <img className="ship-image" src="/aircraftShape.png" alt="" />
-                                            
-                                            <div className="hits">
-                                                <ShipHits count={5} />
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="row">
-                                            <img className="ship-image" src="/battleshipShape.png" alt="" />
-                                        </div>
-                                        
-                                        <div className="row">
-                                            <img className="ship-image" src="/cruiserShape.png" alt="" />
-                                        </div>
-                                            
-                                        <div className="row">
-                                            <img className="ship-image" src="/submarineShape.png" alt="" />
-                                        </div>
-                                            
-                                        <div className="row">
-                                            <img className="ship-image" src="/carrierShape.png" alt="" />
-                                        </div>
-                                    </div>
-
+                                    <ShipHits player={el} />
                                 </div>
                             );
                         })}

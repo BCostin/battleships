@@ -19,7 +19,8 @@ const Intro = () => {
     
     // Enter a username
     const handleName = (e: ChangeEvent<HTMLInputElement>) => {
-        dispatch(setPlayer({...myData, username: e.target.value}));
+        const name = e.target.value;
+        dispatch(setPlayer({...myData, username: name.trim()}));
     }
 
     // Submit your username
@@ -30,15 +31,24 @@ const Intro = () => {
     }
 
     return(
-        <div>
-            Please pick a username <br/>
-            <input 
-                type={"text"}
-                autoFocus
-                onChange={handleName}
-                onKeyDown={handleKeyDown} 
-                value={me.username} 
-            />
+        <div className="intro-wrapper">
+            <div className="content">
+                <h1 className="title">Battleship</h1>
+
+                <div className="inner">
+                    <p className="title">Please enter a username</p>
+
+                    <input 
+                        className="input-username"
+                        type={"text"}
+                        autoFocus
+                        onChange={handleName}
+                        onKeyDown={handleKeyDown} 
+                        value={me.username}
+                        placeholder={"Username here ..."}
+                    />
+                </div>
+            </div>
         </div>
     );
 };
