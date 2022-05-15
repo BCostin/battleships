@@ -34,11 +34,8 @@ const Boards = () => {
     const me = useSelector((state: RootState) => state.player);
     const playerTwo = useMockPlayer();
     
-    const gameInstance = useSelector((state: RootState) => state.game);
-    const gameStatus = gameInstance.status;
-    const gameReady = gameInstance.status == "ongoing";
-
-    const winner = gameInstance.winner;
+    const { status, winner, players, whoNext, hits } = useSelector((state: RootState) => state.game);
+    const gameReady = status == "ongoing";
 
     // When the screen mounts, we must create ALL the data needed to play the game
     useEffect(() => {
@@ -54,7 +51,12 @@ const Boards = () => {
     }, []);
 
     useEffect(() => {
-        console.log('Winner: ', winner);
+        if (winner) {
+            console.log('************************');
+            console.log('Winner: ', winner);
+            console.log('************************');
+        }
+
     }, [winner]);
 
     // Monitor the connected players
@@ -62,20 +64,20 @@ const Boards = () => {
         console.log('A player has joined the room');
 
         // When we have exactly 2 players, update game status and game id
-        if (gameInstance.players.length === 2 && gameStatus === "pending") {
+        if (players.length === 2 && status === "pending") {
             dispatch(setGameID('game-1'));
 
-            if (gameInstance.whoNext == '' && !gameInstance.hits.length) {
+            if (whoNext == '' && !hits.length) {
                 // Randomly set who makes the first move. 0 / 1
                 const rand = Math.round(Math.random());
-                dispatch(setWhoNext(gameInstance.players[rand].uuid));
+                dispatch(setWhoNext(players[rand].uuid));
             }
 
             // Simulate waiting for the other user
             addDelay(() => setGameStatus("ongoing"), 500);
         }
 
-    }, [gameInstance.players]);
+    }, [players]);
 
 
     // Monitor the Game Status. We need this to generate all the data when the game 'starts'
@@ -83,7 +85,7 @@ const Boards = () => {
         // Here we can save different data like the start time
         // or the game instance just for having some sort of history in a db
         // based on the STATUS OF THE GAME
-        switch (gameStatus) {
+        switch (status) {
             case 'pending':
                 // Save specific data for waiting ...
             break;
@@ -105,7 +107,7 @@ const Boards = () => {
                 return;
         }
 
-    }, [gameStatus]);
+    }, [status]);
 
     // Wrapper for setting up the game instance
     const runGameInstance = () => {
@@ -126,7 +128,7 @@ const Boards = () => {
     // Generate random ships for current player
     // We will also use this to generate for the second player
     const generateShips = () => {
-        const playerIDs = gameInstance.players.map((el) => el.uuid);
+        const playerIDs = players.map((el) => el.uuid);
 
         const generatePositions = (shipLen: number, allShips: IShipLayout[]): any => {
             let newPos: TPosition[] = [];
@@ -206,19 +208,18 @@ const Boards = () => {
     };
     
     return(
-        <React.Fragment>
+        <>
+            <div className={`${whoNext == me.uuid ? 'me' : 'enemy'}`} />
+        
             <div className="main-wrapper">
                 {!gameReady ? (
                     <>Game initializing ...</>
                 ) : (
                     <>
-                        {gameInstance.players.map((el, i) => {
+                        {players.map((el, i) => {
                             return(
                                 <div key={i} className="board-container">
-                                    <Board 
-                                        player={el}
-                                        // ships={gameInstance.ships[el.uuid]}
-                                    />
+                                    <Board player={el} />
                                     
                                     <div className="ship-statuses">
                                         <div className="row">
@@ -253,7 +254,7 @@ const Boards = () => {
                 )}
 
             </div>
-        </React.Fragment>
+        </>
     );
 };
 
