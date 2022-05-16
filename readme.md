@@ -1,5 +1,5 @@
 ## Install
-git clone https://cios@bitbucket.org/markandigital/battleships.git
+git clone https://github.com/BCostin/battleships.git
 
 ## Install and run on localhost:3000
 npm install
