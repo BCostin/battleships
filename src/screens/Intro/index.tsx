@@ -1,5 +1,5 @@
-import React, { ChangeEvent, KeyboardEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPlayer } from '../../redux/slice/player';
 import { RootState } from '../../redux/store';
@@ -12,11 +12,19 @@ const myData: IPlayer = {
 
 const Intro = () => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+    const [redirect, setRedirect] = useState(false);
 
     // Get my current data from store
     const me = useSelector((state: RootState) => state.player);
+    const { players, ships } = useSelector((state: RootState) => state.game);
+
+    useEffect(() => {
+        if (players.length && ships[me.uuid]) {
+            setRedirect(true);
+        }
     
+    }, []);
+
     // Enter a username
     const handleName = (e: ChangeEvent<HTMLInputElement>) => {
         const name = e.target.value;
@@ -26,9 +34,11 @@ const Intro = () => {
     // Submit your username
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key == 'Enter') {
-            navigate("/boards");
+            setRedirect(true);
         }
     }
+
+    if (redirect) return <Navigate replace to={"/boards"} />;
 
     return(
         <div className="intro-wrapper">

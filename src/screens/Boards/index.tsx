@@ -38,7 +38,7 @@ const Boards = () => {
     const me = useSelector((state: RootState) => state.player);
     const playerTwo = useMockPlayer();
     
-    const { status, winner, players, whoNext, hits } = useSelector((state: RootState) => state.game);
+    const { status, winner, players, ships, whoNext, hits } = useSelector((state: RootState) => state.game);
     const gameReady = status == "ongoing";
 
     // When the screen mounts, we must create ALL the data needed to play the game
@@ -49,7 +49,9 @@ const Boards = () => {
             dispatch(resetGameInstance());
             navigate('/');
         } else {
-            runGameInstance();
+            if (!players.length || !ships[me.uuid]) {
+                runGameInstance();
+            }
         }
 
     }, []);
@@ -88,8 +90,10 @@ const Boards = () => {
                 // Save start time and other data ...
                 // ... do other things ...
 
-                // Generate ships for both players
-                generateShips();
+                if (!players.length || !ships[me.uuid]) {
+                    // Generate ships for both players
+                    generateShips();
+                }
 
             break;
 
