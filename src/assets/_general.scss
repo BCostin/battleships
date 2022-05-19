@@ -29,8 +29,8 @@ $black15: rgba(0, 0, 0, 0.15);
 $black20: rgba(0, 0, 0, 0.2);
 $squareSize: 40px;
 
-.me + .main-wrapper .board-container:nth-child(1) .board-wrapper,
-.enemy + .main-wrapper .board-container:nth-child(2) .board-wrapper {
+.me + .main-wrapper .board-container:nth-child(2) .board-wrapper,
+.enemy + .main-wrapper .board-container:nth-child(3) .board-wrapper {
     border-color: #10ac84 !important;
 }
 
@@ -40,10 +40,13 @@ $squareSize: 40px;
     display: flex;
     justify-content: space-around;
     align-items: center;
+    position: relative;
+    padding-top: 40px;
     
     @include isTabletAndMobile {
         height: auto;
         flex-direction: column;
+        padding-top: 90px;
     }
 
     .board-container {
@@ -53,18 +56,8 @@ $squareSize: 40px;
     }
 
     .board-display {
-        
         @include isMobile {
             max-width: 306px;
-        }
-
-        .player-name {
-            text-transform: capitalize;
-            display: flex;
-
-            .emoji {
-                margin-right: 10px;
-            }
         }
     }
 

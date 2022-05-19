@@ -34,8 +34,6 @@ interface IGame {
     players: IPlayer[], // array of uuids
     ships: Record<string, IShipLayout[]>,
     guesses: IGuess[],
-    hits: [], // Store all correct guesses / direct hits
-    misses: [], // Store all incorrect guesses / direct miss
     whoNext: string, // an existing uuid
     winner: IPlayer | null,
 }

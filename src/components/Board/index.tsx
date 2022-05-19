@@ -2,7 +2,7 @@ import React, { MouseEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addDelay, getRandomNr } from '../../helpers/methods';
 import { useMockPlayer } from '../../hooks/useMockPlayer';
-import { addGuess, setShips } from '../../redux/slice/game';
+import { addGuess } from '../../redux/slice/game';
 import { RootState } from '../../redux/store';
 
 export const MAX_BOARD_UNITS = 10;
@@ -110,11 +110,8 @@ export const Board = ({ player }: IBoard) => {
         });
     }
 
-    const Emoji = () => <div className="emoji" dangerouslySetInnerHTML={{__html: `&#128516`}} />;
-
     return(
         <div className="board-display">
-            <h2 className="player-name"><Emoji /> {player.username}</h2>
             <div className="board-wrapper">
                 <div className="board" data-player={player.uuid}>
                     {maxUnits.map((row, idxRow) => {

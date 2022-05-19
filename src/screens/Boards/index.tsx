@@ -5,6 +5,7 @@ import {Board, MAX_BOARD_UNITS } from '../../components/Board';
 import GameLoader from '../../components/GameLoader';
 import ModalFinish from '../../components/ModalFinish';
 import PlayAgainButton from '../../components/PlayAgainButton';
+import ScoreBar from '../../components/ScoreBar';
 import ShipHits from '../../components/ShipHits';
 import { addDelay, getDirection, getRandomNr } from '../../helpers/methods';
 import { useMockPlayer } from '../../hooks/useMockPlayer';
@@ -38,7 +39,7 @@ const Boards = () => {
     const me = useSelector((state: RootState) => state.player);
     const playerTwo = useMockPlayer();
     
-    const { status, winner, players, ships, whoNext, hits } = useSelector((state: RootState) => state.game);
+    const { status, winner, players, ships, whoNext, guesses } = useSelector((state: RootState) => state.game);
     const gameReady = status == "ongoing";
 
     // When the screen mounts, we must create ALL the data needed to play the game
@@ -64,7 +65,7 @@ const Boards = () => {
         if (players.length === 2 && status === "pending") {
             dispatch(setGameID('game-1'));
 
-            if (whoNext == '' && !hits.length) {
+            if (whoNext == '') {
                 // Randomly set who makes the first move. 0 / 1
                 const rand = Math.round(Math.random());
                 dispatch(setWhoNext(players[rand].uuid));
@@ -217,6 +218,12 @@ const Boards = () => {
 
                 ) : (
                     <>
+                        <ScoreBar 
+                            playerOne={me} 
+                            playerTwo={playerTwo}
+                            hits={guesses.filter(el => el.hit)}
+                        />
+
                         {players.map((el, i) => {
                             return(
                                 <div key={i} className="board-container">

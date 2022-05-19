@@ -7,8 +7,6 @@ const initialState: IGame = {
     players: [],
     ships: {},
     guesses: [],
-    hits: [],
-    misses: [],
     whoNext: '',
     winner: null,
 }
