@@ -1,8 +1,15 @@
 import { MAX_BOARD_UNITS } from "../components/Board";
-import { shipTypes } from "../screens/Boards";
 import { getDirection } from "./methods";
 
 export const shiptTypesArr = ["carrier", "battleship", "cruiser", "submarine", "destroyer"];
+
+export const shipTypes: Record<string, IShipType> = {
+    carrier: { size: 5, count: 1, color: 'red', image: 'aircraftShape.png' },
+    battleship: { size: 4, count: 1, color: 'blue', image: 'battleshipShape.png' },
+    cruiser: { size: 3, count: 1, color: 'green', image: 'cruiserShape.png' },
+    submarine: { size: 3, count: 1, color: 'yellow', image: 'submarineShape.png' },
+    destroyer: { size: 2, count: 1, color: 'black', image: 'carrierShape.png' },
+};
 
 export const generateAllCoords = (startCoords: TPosition, shipLen: number) => {
     if (!startCoords.length) return [startCoords];

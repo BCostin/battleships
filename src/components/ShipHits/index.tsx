@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { shipTypes } from '../../helpers/boardMethods';
 import { RootState } from '../../redux/store';
-import { shipTypes } from '../../screens/Boards';
 import ShipDestroyed from './Destroyed';
 
 interface IShipHits {
@@ -10,7 +10,6 @@ interface IShipHits {
 
 const ShipHits = ({ player }: IShipHits) => {
     const [shipHit, setShipHit] = useState<any>({});
-    const me = useSelector((state: RootState) => state.player);
     const { guesses } = useSelector((state: RootState) => state.game);
 
     useEffect(() => {

@@ -12,14 +12,6 @@ import { useMockPlayer } from '../../hooks/useMockPlayer';
 import { resetGameInstance, setGameID, setShips, setStatus, setThisPlayer, setWhoNext } from '../../redux/slice/game';
 import { RootState } from '../../redux/store';
 
-export const shipTypes: Record<string, IShipType> = {
-    carrier: { size: 5, count: 1, color: 'red', image: 'aircraftShape.png' },
-    battleship: { size: 4, count: 1, color: 'blue', image: 'battleshipShape.png' },
-    cruiser: { size: 3, count: 1, color: 'green', image: 'cruiserShape.png' },
-    submarine: { size: 3, count: 1, color: 'yellow', image: 'submarineShape.png' },
-    destroyer: { size: 2, count: 1, color: 'black', image: 'carrierShape.png' },
-};
-
 const Boards = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -31,10 +23,8 @@ const Boards = () => {
     const { status, winner, players, ships, whoNext, guesses } = useSelector((state: RootState) => state.game);
     const gameReady = status == "ongoing";
 
-    // When the screen mounts, we must create ALL the data needed to play the game
+    // When the screen mounts, we must create all the data needed to play the game
     useEffect(() => {
-        // On refresh just redirect back to intro based on my username
-        // Otherwise, start the game
         if (!me.username) {
             dispatch(resetGameInstance());
             navigate('/');
@@ -48,8 +38,6 @@ const Boards = () => {
 
     // Monitor the connected players
     useEffect(() => {
-        console.warn('A player has joined the room');
-
         // When we have exactly 2 players, update game status and game id
         if (players.length === 2 && status === "pending") {
             dispatch(setGameID('game-1'));
@@ -68,9 +56,6 @@ const Boards = () => {
 
     // Monitor the Game Status. We need this to generate all the data when the game 'starts'
     useEffect(() => {
-        // Here we can save different data like the start time
-        // or the game instance just for having some sort of history in a db
-        // based on the STATUS OF THE GAME
         switch (status) {
             case 'pending':
                 // Save specific data for waiting ...
@@ -92,7 +77,7 @@ const Boards = () => {
             break;
 
             default:
-                return;
+                () => {};
         }
 
     }, [status]);
@@ -106,30 +91,19 @@ const Boards = () => {
 
     // 'Connect' both players to the same instance / room
     const connectPlayers = () => {
-        // Add myself
         dispatch(setThisPlayer(me));
-
-        // At the same time, we will connect the other player here, for simplicity
         dispatch(setThisPlayer(playerTwo));
     };
 
     // Generate random ships for current player
-    // We will also use this to generate for the second player
     const generateShips = () => {
         const playerIDs = players.map((el) => el.uuid);
 
+        // Generate all coords. Allow left to right / right to left / top to bottom / bottom to top
         const generatePositions = (shipLen: number, allShips: IShipLayout[]): any => {
-            const startCoords: TPosition = [getRandomNr(MAX_BOARD_UNITS), getRandomNr(MAX_BOARD_UNITS)]; // set a default value non-zero
-
-            // Generate all coords. Allow left to right / right to left / top to bottom / bottom to top
+            const startCoords: TPosition = [getRandomNr(MAX_BOARD_UNITS), getRandomNr(MAX_BOARD_UNITS)];
             const newPos = generateAllCoords(startCoords, shipLen);
-            
-            // Check if there's another ship with an intersection point
-            if (checkIntersection(allShips, newPos)) {
-                return generatePositions(shipLen, allShips);
-            } else {
-                return newPos;
-            }
+            return checkIntersection(allShips, newPos) ? generatePositions(shipLen, allShips) : newPos;
         };
 
         // Object containing ships for each Player UUID
@@ -141,20 +115,12 @@ const Boards = () => {
     return(
         <>
             {winner ? <ModalFinish winner={winner} me={me} /> : null}
-
             <div className={`${whoNext == me.uuid ? 'me' : 'enemy'}`} />
         
             <div className="main-wrapper">
-                {!gameReady ? (
-                    <GameLoader />
-
-                ) : (
+                {!gameReady ? <GameLoader /> : (
                     <>
-                        <ScoreBar 
-                            playerOne={me} 
-                            playerTwo={playerTwo}
-                            hits={guesses.filter(el => el.hit)}
-                        />
+                        <ScoreBar playerOne={me} playerTwo={playerTwo} hits={guesses.filter(el => el.hit)} />
 
                         {players.map((el, i) => {
                             return(
@@ -166,7 +132,6 @@ const Boards = () => {
                         })}
                     </>
                 )}
-
             </div>
         </>
     );

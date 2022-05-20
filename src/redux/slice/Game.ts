@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { shipTypes } from '../../screens/Boards';
+import { shipTypes } from '../../helpers/boardMethods';
 
 const initialState: IGame = {
     gameID: '',
