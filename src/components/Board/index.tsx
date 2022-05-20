@@ -4,6 +4,7 @@ import { addDelay, getRandomNr } from '../../helpers/methods';
 import { useMockPlayer } from '../../hooks/useMockPlayer';
 import { addGuess } from '../../redux/slice/game';
 import { RootState } from '../../redux/store';
+import BoardItem from '../BoardItem';
 
 export const MAX_BOARD_UNITS = 10;
 const maxUnits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -117,10 +118,10 @@ export const Board = ({ player }: IBoard) => {
                     {maxUnits.map((row, idxRow) => {
                         return(
                             <div key={idxRow} className='row'>
-                                {maxUnits.map((item, idxItem) => {
+                                {maxUnits.map((_item, idxItem) => {
                                     const itemCoords = [idxItem, idxRow];
 
-                                    return <Item 
+                                    return <BoardItem 
                                                 key={`row-${idxItem}`} 
                                                 value={[itemCoords[0], itemCoords[1]]} 
                                                 actionDisabled={player.uuid != me.uuid}
@@ -136,54 +137,5 @@ export const Board = ({ player }: IBoard) => {
 
             </div>
         </div>
-    );
-};
-
-export const Item = ({ value, playerUUID, checkHandler, actionDisabled, playerShips }: IBoardItem) => {
-    const { guesses } = useSelector((state: RootState) => state.game);
-    let shipFragment = false;
-    let shipName = '';
-    let classes = '';
-
-    const isHit = guesses.filter(guessEl => {
-        return guessEl.uuid == playerUUID && JSON.stringify(guessEl.position) == JSON.stringify(value);
-    });
-
-    playerShips && playerShips.forEach((shipEl) => {
-        if (!shipFragment && JSON.stringify(shipEl.positions).includes(JSON.stringify(value))) {
-            shipName = shipEl.ship;
-            classes += ` ${shipEl.color}`;
-            shipFragment = true;
-        }
-    });
-
-    if (actionDisabled) classes += ' disabled';
-    if (shipFragment) classes += ' ship-fragment';
-
-    if (isHit && isHit[0]) {
-        classes += isHit[0].hit ? ' hit' : ' miss';
-    }
-
-    const handleItem = (e: MouseEvent<HTMLDivElement>) => {
-        if (actionDisabled) {
-            console.warn('You cannot use the other player\'s Board');
-            return;
-        }
-
-        if (typeof checkHandler == 'function') {
-            checkHandler({
-                uuid: playerUUID, 
-                position: value,
-            });
-        }
-    };
-
-    return(
-        <div 
-            className={`item ${classes}`} 
-            onClick={handleItem}
-            data-value={value}
-            data-ship={shipName}
-        />
     );
 };

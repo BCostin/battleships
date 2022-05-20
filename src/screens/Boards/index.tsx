@@ -4,15 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import {Board, MAX_BOARD_UNITS } from '../../components/Board';
 import GameLoader from '../../components/GameLoader';
 import ModalFinish from '../../components/ModalFinish';
-import PlayAgainButton from '../../components/PlayAgainButton';
 import ScoreBar from '../../components/ScoreBar';
 import ShipHits from '../../components/ShipHits';
-import { addDelay, getDirection, getRandomNr } from '../../helpers/methods';
+import { checkIntersection, generateAllCoords, generatePlayerShips } from '../../helpers/boardMethods';
+import { addDelay, getRandomNr } from '../../helpers/methods';
 import { useMockPlayer } from '../../hooks/useMockPlayer';
 import { resetGameInstance, setGameID, setShips, setStatus, setThisPlayer, setWhoNext } from '../../redux/slice/game';
 import { RootState } from '../../redux/store';
-
-const shiptTypesArr = ["carrier", "battleship", "cruiser", "submarine", "destroyer"];
 
 export const shipTypes: Record<string, IShipType> = {
     carrier: { size: 5, count: 1, color: 'red', image: 'aircraftShape.png' },
@@ -21,15 +19,6 @@ export const shipTypes: Record<string, IShipType> = {
     submarine: { size: 3, count: 1, color: 'yellow', image: 'submarineShape.png' },
     destroyer: { size: 2, count: 1, color: 'black', image: 'carrierShape.png' },
 };
-
-// // Variable Reference from assignment ... leave this comment
-// const shipLayout = [
-//     { "ship": "carrier", "positions": [[2,9], [3,9], [4,9], [5,9], [6,9]] },
-//     { "ship": "battleship", "positions": [[5,2], [5,3], [5,4], [5,5]] },
-//     { "ship": "cruiser", "positions": [[8,1], [8,2], [8,3]] },
-//     { "ship": "submarine", "positions": [[3,0], [3,1], [3,2]] },
-//     { "ship": "destroyer", "positions": [[0,0], [1,0]] }
-// ]
 
 const Boards = () => {
     const dispatch = useDispatch();
@@ -130,79 +119,22 @@ const Boards = () => {
         const playerIDs = players.map((el) => el.uuid);
 
         const generatePositions = (shipLen: number, allShips: IShipLayout[]): any => {
-            let newPos: TPosition[] = [];
-            let startCoords: TPosition = [getRandomNr(MAX_BOARD_UNITS), getRandomNr(MAX_BOARD_UNITS)]; // set a default value non-zero
+            const startCoords: TPosition = [getRandomNr(MAX_BOARD_UNITS), getRandomNr(MAX_BOARD_UNITS)]; // set a default value non-zero
 
-            const isHoriz = getDirection() === 'horizontal';
-            
-            const toRight = isHoriz && startCoords[0] + (shipLen - 1) >= MAX_BOARD_UNITS - 1 ? false : true;
-            const toBottom = !isHoriz && startCoords[1] + (shipLen - 1) >= MAX_BOARD_UNITS - 1 ? false : true;
-            
-            // Add the starting point of the ship
-            newPos = [startCoords];
-
-            const updatedShipLen = shipLen - 1;
-
-            // Generate the rest of the coords.
-            // Allow generation from left to right / right to left / top to bottom / bottom to top
-            for (let i = 0; i < updatedShipLen; i ++) {
-                const xVal = newPos[newPos.length - 1][0];
-                const yVal = newPos[newPos.length - 1][1];
-
-                const x = isHoriz ?  xVal + (toRight ? 1 : -1) : xVal;
-                const y = !isHoriz ? yVal + (toBottom ? 1 : -1) : yVal;
-                
-                newPos.push([x, y]);
-            }
+            // Generate all coords. Allow left to right / right to left / top to bottom / bottom to top
+            const newPos = generateAllCoords(startCoords, shipLen);
             
             // Check if there's another ship with an intersection point
-            const pointsIntersect = allShips.filter((el) => {
-                if (el.positions) {
-                    let exists: any = [];
-                    newPos.forEach(newEl => {
-                        if (JSON.stringify(el.positions).includes(JSON.stringify(newEl))) {
-                            exists.push(newEl);
-                        }
-                    });
-                    return exists.length > 0; 
-                }
-            });
-
-            if (pointsIntersect.length) {
+            if (checkIntersection(allShips, newPos)) {
                 return generatePositions(shipLen, allShips);
-
             } else {
                 return newPos;
             }
         };
 
-        let newShips: IGame["ships"] = {}; // Object containing ships for each Player UUID
+        // Object containing ships for each Player UUID
+        const newShips = generatePlayerShips(playerIDs, generatePositions); 
 
-        playerIDs.forEach((el) => {
-            let playerShips: IShipLayout[] = [];
-            shiptTypesArr.forEach((el) => {
-                // Start generating the positions
-                const { size, color } = shipTypes[el];
-                let positions = generatePositions(size, playerShips);
-                
-                const newShip: IShipLayout = {
-                    ship: el,
-                    size: size,
-                    color: color !== undefined ? color : '',
-                    hits: 0,
-                    positions: positions,
-                };
-    
-                playerShips.push(newShip);
-            });
-            
-            // Add ships to each player uuid
-            newShips[el] = playerShips;
-            
-            // Release var
-            playerShips = [];
-        });
-        
         dispatch(setShips(newShips));
     };
     
